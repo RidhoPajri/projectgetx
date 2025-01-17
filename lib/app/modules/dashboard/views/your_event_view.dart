@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:myapp/app/modules/dashboard/controllers/dashboard_controller.dart';
-import 'package:myapp/app/modules/dashboard/views/add_view.dart';
-import 'package:myapp/app/modules/dashboard/views/edit_view.dart';
-import 'package:myapp/app/modules/dashboard/views/event_detail_view.dart';
-import 'package:zoom_tap_animation/zoom_tap_animation.dart';
-import 'package:zoom_tap_animation/zoom_tap_animation.dart';
+import '../controllers/dashboard_controller.dart';
+import 'add_view.dart';
+import 'edit_view.dart';
 
 class YourEventView extends GetView {
   const YourEventView({super.key});
   @override
- Widget build(BuildContext context) {
+   Widget build(BuildContext context) {
   // Mendapatkan instance dari DashboardController menggunakan GetX
   DashboardController controller = Get.put(DashboardController());
 
@@ -106,14 +103,13 @@ class YourEventView extends GetView {
                 Divider(height: 10), // Membuat garis pemisah antar event
                 const SizedBox(height: 16),
                 Row(
-                   mainAxisAlignment: MainAxisAlignment.end, // Posisi item di ujung kanan
-                    children: [
+  mainAxisAlignment: MainAxisAlignment.end, // Posisi item di ujung kanan
+  children: [
     // Tombol Edit buat ngedit event
     TextButton.icon(
       icon: const Icon(Icons.edit, color: Colors.blue), // Ikon edit dengan warna biru
       label: const Text('Edit', style: TextStyle(color: Colors.blue)), // Teks "Edit" warna biru
       onPressed: () {
-        controller.deleteEvent(id: event.id!); 
         // Aksi kalau tombol Edit diklik
         Get.to(
           () => EditView(
@@ -128,10 +124,9 @@ class YourEventView extends GetView {
       icon: const Icon(Icons.delete, color: Colors.red), // Ikon delete dengan warna merah
       label: const Text('Delete', style: TextStyle(color: Colors.red)), // Teks "Delete" warna merah
       onPressed: () {
-        
+        controller.deleteEvent(id: event.id!);
       },
     ),
-    
   ],
 ), // Memberikan jarak setelah garis pemisah
               ],

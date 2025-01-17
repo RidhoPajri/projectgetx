@@ -1,30 +1,31 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:get_storage/get_storage.dart';
-import 'package:myapp/app/data/event_response.dart';
 
 import '../../../data/detail_event_response.dart';
+import '../../../data/event_response.dart';
+import '../../../data/profile_response.dart';
 import '../../../utils/api.dart';
 import '../views/index_view.dart';
 import '../views/profile_view.dart';
 import '../views/your_event_view.dart';
 
 class DashboardController extends GetxController {
-  //TODO: Implement DashboardController
-  var selectedIndex = 0.obs;
   final _getConnect = GetConnect();
+  var selectedIndex = 0.obs;
+  var profileResponse = Rxn<ProfileResponse>();
+
   final token = GetStorage().read('token');
 
-  void changeIndex(int index) {
-    selectedIndex.value = index;
-  }
+  // Deklarasikan TextEditingController di sini agar dapat digunakan secara global dalam controller
+  TextEditingController nameController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  TextEditingController eventDateController = TextEditingController();
+  TextEditingController locationController = TextEditingController();
 
-  final List<Widget> pages = [
-    IndexView(),
-    YourEventView(),
-    ProfileView(),
-  ];
-
+  // Mengambil event
   Future<EventResponse> getEvent() async {
     final response = await _getConnect.get(
       BaseUrl.events,
@@ -35,6 +36,8 @@ class DashboardController extends GetxController {
   }
 
   var yourEvents = <Events>[].obs;
+
+  // Mengambil event milik pengguna
   Future<void> getYourEvent() async {
     final response = await _getConnect.get(
       BaseUrl.yourEvent,
@@ -45,176 +48,211 @@ class DashboardController extends GetxController {
     yourEvents.value = eventResponse.events ?? [];
   }
 
-  // add
-  // Controller buat nama event, ini kayak kotak yang nyimpen teks
-  TextEditingController nameController = TextEditingController();
-// Controller buat deskripsi event, tinggal ketik deskripsinya di sini
-  TextEditingController descriptionController = TextEditingController();
-// Controller buat tanggal event, biar gampang atur tanggal
-  TextEditingController eventDateController = TextEditingController();
-// Controller buat lokasi event, masukin alamat atau tempatnya
-  TextEditingController locationController = TextEditingController();
-
-// Fungsi buat tambah event, sekali klik langsung gas upload data
-  void addEvent() async {
-    // Kirim data ke server pake _getConnect.post, lengkap banget parameternya
-    final response = await _getConnect.post(
-      BaseUrl.events, // URL buat API tambah event
-      {
-        'name': nameController.text, // Ambil teks dari input nama
-        'description': descriptionController.text, // Deskripsi event
-        'event_date': eventDateController.text, // Tanggal event
-        'location': locationController.text, // Lokasi event
-      },
-      headers: {
-        'Authorization': "Bearer $token"
-      }, // Header buat autentikasi, token wajib nih
-      contentType: "application/json", // Formatnya JSON biar rapi
-    );
-
-    // Cek respon server, kalo sukses kode 201
-    if (response.statusCode == 201) {
-      // Kalau sukses, kasih notifikasi pake Get.snackbar
-      Get.snackbar(
-        'Success', // Judul notifikasi
-        'Event Added', // Pesan sukses
-        snackPosition: SnackPosition.BOTTOM, // Posisi notifikasi di bawah
-        backgroundColor: Colors.green, // Warna hijau, vibes happy
-        colorText: Colors.white, // Teks putih biar kontras
-      );
-      // Bersihin semua input, biar fresh lagi
-      nameController.clear();
-      descriptionController.clear();
-      eventDateController.clear();
-      locationController.clear();
-      update(); // Update UI biar langsung kelihatan perubahan
-      getEvent(); // Refresh daftar event
-      getYourEvent(); // Refresh daftar event user
-      Get.close(1); // Tutup halaman atau modal
-    } else {
-      // Kalau gagal, kasih notifikasi gagal
-      Get.snackbar(
-        'Failed', // Judul notifikasi
-        'Event Failed to Add', // Pesan gagal
-        snackPosition: SnackPosition.BOTTOM, // Posisi notifikasi di bawah
-        backgroundColor: Colors.red, // Warna merah, vibes alert
-        colorText: Colors.white, // Teks putih biar jelas
-      );
-    }
-  }
-
-  // detail event
-  // Fungsi buat ngambil detail event, tinggal panggil dan kasih ID event-nya
+  // Fungsi untuk mengambil detail event berdasarkan ID
   Future<DetailEventResponse> getDetailEvent({required int id}) async {
-    // Kirim request GET ke server buat ambil detail event
     final response = await _getConnect.get(
-      '${BaseUrl.detailEvents}/$id', // URL detail event, ID-nya ditempel di sini
-      headers: {
-        'Authorization': "Bearer $token"
-      }, // Header buat autentikasi, token kudu ada
-      contentType: "application/json", // Format data JSON biar proper
+      '${BaseUrl.detailEvents}/$id', // URL endpoint untuk mengambil detail event
+      headers: {'Authorization': "Bearer $token"},
+      contentType: "application/json",
     );
-    // Balikin data yang udah di-parse ke model DetailEventResponse
     return DetailEventResponse.fromJson(response.body);
   }
 
-  // edit
-  // Fungsi buat edit data event, tinggal panggil terus kasih ID-nya
-  void editEvent({required int id}) async {
-    // Kirim request POST ke server, tapi dengan method PUT buat update data
+  // Menambah event
+  void addEvent() async {
     final response = await _getConnect.post(
-      '${BaseUrl.events}/$id', // URL endpoint ditambah ID event
+      BaseUrl.events,
       {
-        'name': nameController.text, // Nama event dari input
-        'description': descriptionController.text, // Deskripsi event dari input
-        'event_date': eventDateController.text, // Tanggal event dari input
-        'location': locationController.text, // Lokasi event dari input
-        '_method': 'PUT', // Hack buat ganti method jadi PUT
+        'name': nameController.text,
+        'description': descriptionController.text,
+        'event_date': eventDateController.text,
+        'location': locationController.text,
       },
-      headers: {'Authorization': "Bearer $token"}, // Header buat autentikasi
-      contentType: "application/json", // Format data JSON
+      headers: {'Authorization': "Bearer $token"},
+      contentType: "application/json",
     );
 
-    // Cek respons dari server
-    if (response.statusCode == 200) {
-      // Kalau berhasil, kasih notifikasi sukses
+    if (response.statusCode == 201) {
+      // Notifikasi dan reset form setelah sukses
       Get.snackbar(
-        'Success', // Judul snack bar
-        'Event Updated', // Pesan sukses
-        snackPosition: SnackPosition.BOTTOM, // Posisi snack bar di bawah
-        backgroundColor: Colors.green, // Warna latar hijau (success vibes)
-        colorText: Colors.white, // Warna teks putih biar kontras
+        'Success',
+        'Event Added',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
       );
-
-      // Clear semua input biar bersih
       nameController.clear();
       descriptionController.clear();
       eventDateController.clear();
       locationController.clear();
-
-      // Update UI dan reload data event
       update();
-      getEvent(); // Panggil ulang data semua event
-      getYourEvent(); // Panggil ulang data event user
-      Get.close(1); // Tutup halaman edit
+      getEvent();
+      getYourEvent();
+      Get.close(1); // Tutup halaman atau modal
     } else {
-      // Kalau gagal, kasih notifikasi gagal
+      // Notifikasi jika gagal
       Get.snackbar(
-        'Failed', // Judul snack bar
-        'Event Failed to Update', // Pesan gagal
-        snackPosition: SnackPosition.BOTTOM, // Posisi snack bar di bawah
-        backgroundColor: Colors.red, // Warna latar merah (error vibes)
-        colorText: Colors.white, // Warna teks putih biar jelas
+        'Failed',
+        'Event Failed to Add',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
 
-  // delete events
-  // Fungsi buat hapus event, tinggal kasih ID-nya
-  void deleteEvent({required int id}) async {
-    // Kirim request POST ke server, tapi sebenarnya buat DELETE
+  // Mengedit event
+  void editEvent({required int id}) async {
     final response = await _getConnect.post(
-      '${BaseUrl.deleteEvents}/$id', // URL endpoint ditambah ID event
+      '${BaseUrl.events}/$id',
       {
-        '_method': 'delete', // Hack biar request diubah jadi DELETE
+        'name': nameController.text,
+        'description': descriptionController.text,
+        'event_date': eventDateController.text,
+        'location': locationController.text,
+        '_method': 'PUT', // Hack method jadi PUT untuk update
       },
-      headers: {
-        'Authorization': "Bearer $token"
-      }, // Header autentikasi (token user)
-      contentType: "application/json", // Data dikirim dalam format JSON
+      headers: {'Authorization': "Bearer $token"},
+      contentType: "application/json",
     );
 
-    // Cek respons server, kalau sukses ya good vibes
     if (response.statusCode == 200) {
-      // Notifikasi sukses hapus event
+      // Notifikasi jika sukses
       Get.snackbar(
-        'Success', // Judul snack bar
-        'Event Deleted', // Pesan sukses
-        snackPosition: SnackPosition.BOTTOM, // Posisi snack bar di bawah
-        backgroundColor: Colors.green, // Latar hijau biar lega
-        colorText: Colors.white, // Teks putih biar baca enak
+        'Success',
+        'Event Updated',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
       );
-
-      // Update UI dan reload data event biar up-to-date
-      update(); // Kasih tahu UI kalau ada yang berubah
-      getEvent(); // Refresh semua event
-      getYourEvent(); // Refresh event user
+      nameController.clear();
+      descriptionController.clear();
+      eventDateController.clear();
+      locationController.clear();
+      update();
+      getEvent();
+      getYourEvent();
+      Get.close(1); // Tutup halaman edit
     } else {
-      // Kalau gagal, ya udah kasih tau user aja
+      // Notifikasi jika gagal
       Get.snackbar(
-        'Failed', // Judul snack bar
-        'Event Failed to Delete', // Pesan error
-        snackPosition: SnackPosition.BOTTOM, // Posisi snack bar di bawah
-        backgroundColor: Colors.red, // Latar merah biar tegas
-        colorText: Colors.white, // Teks putih biar tetap baca jelas
+        'Failed',
+        'Event Failed to Update',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     }
   }
 
+  // Menghapus event
+  void deleteEvent({required int id}) async {
+    final response = await _getConnect.post(
+      '${BaseUrl.deleteEvents}$id',
+      {
+        '_method': 'delete', // Hack DELETE request
+      },
+      headers: {'Authorization': "Bearer $token"},
+      contentType: "application/json",
+    );
+
+    if (response.statusCode == 200) {
+      Get.snackbar(
+        'Success',
+        'Event Deleted',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      update();
+      getEvent();
+      getYourEvent();
+    } else {
+      Get.snackbar(
+        'Failed',
+        'Event Failed to Delete',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> getProfile() async {
+    final response = await _getConnect.get(
+      BaseUrl.profile,
+      headers: {'Authorization': "Bearer $token"},
+      contentType: "application/json",
+    );
+
+    if (response.statusCode == 200) {
+      profileResponse.value = ProfileResponse.fromJson(response.body);
+    } else {
+      Get.snackbar(
+        'Error',
+        'Failed to load profile',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  // Fungsi buat logout user
+  void logOut() async {
+    // Kirim request POST ke server buat logout
+    final response = await _getConnect.post(
+      BaseUrl.logout, // Endpoint buat logout
+      {}, // Gak ada body karena logout aja
+      headers: {'Authorization': "Bearer $token"}, // Header dengan token user
+      contentType: "application/json", // Format data JSON
+    );
+
+    // Kalau server bilang logout sukses
+    if (response.statusCode == 200) {
+      // Kasih notifikasi logout berhasil
+      Get.snackbar(
+        'Success', // Judul snack bar
+        'Logout Success', // Pesan sukses
+        snackPosition: SnackPosition.BOTTOM, // Snack muncul di bawah
+        backgroundColor: Colors.green, // Warna hijau biar good vibes
+        colorText: Colors.white, // Teks putih biar jelas
+      );
+
+      // Hapus semua data user dari penyimpanan lokal
+      GetStorage().erase();
+
+      // Redirect user ke halaman login
+      Get.offAllNamed('/login'); // Bersih-bersih dan langsung ke login
+    } else {
+      // Kalau gagal logout, kasih tau user
+      Get.snackbar(
+        'Failed', // Judul snack bar
+        'Logout Failed', // Pesan error
+        snackPosition: SnackPosition.BOTTOM, // Snack muncul di bawah
+        backgroundColor: Colors.red, // Warna merah buat error vibes
+        colorText: Colors.white, // Teks putih biar kontras
+      );
+    }
+  }
+
+  // Fungsi untuk mengubah halaman yang ditampilkan
+  void changeIndex(int index) {
+    selectedIndex.value = index;
+  }
+
+  final List<Widget> pages = [
+    IndexView(),
+    YourEventView(),
+    ProfileView(),
+  ];
+
+  // Inisialisasi data ketika controller dimulai
   @override
   void onInit() {
     getEvent();
     getYourEvent();
+    getProfile();
     super.onInit();
   }
 
@@ -225,6 +263,10 @@ class DashboardController extends GetxController {
 
   @override
   void onClose() {
+    nameController.dispose();
+    descriptionController.dispose();
+    eventDateController.dispose();
+    locationController.dispose();
     super.onClose();
   }
 }
