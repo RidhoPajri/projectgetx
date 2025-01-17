@@ -28,8 +28,7 @@ class AddView extends GetView {
           children: [
             // Animasi Lottie yang lucu biar halaman nggak boring
             Padding(
-              padding: const EdgeInsets.only(
-                  top: 70.0), // Kasih jarak atas biar napas
+              padding: const EdgeInsets.only(top: 70.0), // Kasih jarak atas biar napas
               child: Lottie.network(
                 'https://gist.githubusercontent.com/olipiskandar/2095343e6b34255dcfb042166c4a3283/raw/d76e1121a2124640481edcf6e7712130304d6236/praujikom_kucing.json',
                 fit: BoxFit.cover, // Animasinya dibikin pas di layar
@@ -37,14 +36,11 @@ class AddView extends GetView {
             ),
             // Input buat nama event. Jangan typo ya!
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 15), // Jarak kanan-kiri, biar nggak mepet
+              padding: const EdgeInsets.symmetric(horizontal: 15), // Jarak kanan-kiri, biar nggak mepet
               child: TextField(
-                controller:
-                    controller.nameController, // Controller buat ngontrol input
+                controller: controller.nameController, // Controller buat ngontrol input
                 decoration: const InputDecoration(
-                  border:
-                      OutlineInputBorder(), // Biar ada border, simple tapi classy
+                  border: OutlineInputBorder(), // Biar ada border, simple tapi classy
                   labelText: 'Event Name', // Labelnya "Event Name", jelas kan?
                   hintText: 'Masukan Nama Event', // Bocoran teks kalau kosong
                 ),
@@ -52,28 +48,22 @@ class AddView extends GetView {
             ),
             // Input buat deskripsi event. Jelasin event kamu di sini
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 15, vertical: 15), // Kasih ruang napas
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15), // Kasih ruang napas
               child: TextField(
-                controller: controller
-                    .descriptionController, // Controller buat deskripsi
+                controller: controller.descriptionController, // Controller buat deskripsi
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(), // Border kotak, biar rapih
-                  labelText:
-                      'Description', // Labelnya deskripsi, apa lagi coba?
+                  labelText: 'Description', // Labelnya deskripsi, apa lagi coba?
                   hintText: 'Masukan Deskripsi', // Buat clue aja
                 ),
               ),
             ),
             // Input tanggal event. Tinggal klik terus pilih tanggal, gampang banget
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 15), // Kasih jarak kanan-kiri
+              padding: const EdgeInsets.symmetric(horizontal: 15), // Kasih jarak kanan-kiri
               child: TextField(
-                controller:
-                    controller.eventDateController, // Controller tanggal
-                readOnly:
-                    true, // Teks nggak bisa diubah langsung, harus lewat picker
+                controller: controller.eventDateController, // Controller tanggal
+                readOnly: true, // Teks nggak bisa diubah langsung, harus lewat picker
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(), // Biar kelihatan kotak rapi
                   labelText: 'Event Date', // Labelnya tanggal
@@ -83,24 +73,20 @@ class AddView extends GetView {
                   // Nih, kalau ditekan bakal keluar kalender
                   DateTime? selectedDate = await showDatePicker(
                     context: context, // Butuh context buat munculin
-                    initialDate:
-                        DateTime.now(), // Mulainya dari tanggal sekarang
+                    initialDate: DateTime.now(), // Mulainya dari tanggal sekarang
                     firstDate: DateTime(2024), // Minimal pilih tahun 2024
-                    lastDate: DateTime(
-                        2100), // Maksimal sampai tahun 2100. Wkwk lama amat!
+                    lastDate: DateTime(2100), // Maksimal sampai tahun 2100. Wkwk lama amat!
                   );
                   // Kalau tanggalnya kepilih, langsung di-update
                   if (selectedDate != null) {
-                    controller.eventDateController.text =
-                        DateFormat('yyyy-MM-dd').format(selectedDate);
+                    controller.eventDateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
                   }
                 },
               ),
             ),
             // Input buat lokasi. Eventnya di mana nih?
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 15, vertical: 15), // Jarak biar lega
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15), // Jarak biar lega
               child: TextField(
                 controller: controller.locationController, // Controller lokasi
                 decoration: const InputDecoration(
@@ -120,8 +106,7 @@ class AddView extends GetView {
               width: 150, // Lebar tombol
               decoration: BoxDecoration(
                 color: Colors.blue, // Warna tombol biru, pop-up banget
-                borderRadius:
-                    BorderRadius.circular(20), // Sudut melengkung, biar smooth
+                borderRadius: BorderRadius.circular(20), // Sudut melengkung, biar smooth
               ),
               child: TextButton(
                 onPressed: () {

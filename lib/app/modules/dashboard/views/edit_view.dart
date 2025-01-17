@@ -26,32 +26,28 @@ class EditView extends GetView {
         backgroundColor: HexColor('#feeee8'), // Warna pastel yang calming
       ),
       backgroundColor: HexColor('#feeee8'), // Latar belakang sama kayak AppBar
-      body: SingleChildScrollView(
-        child: FutureBuilder<DetailEventResponse>(
-          future:
-              controller.getDetailEvent(id: id), // Ambil detail event sesuai ID
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              // Kalau masih loading, kasih animasi lucu biar nggak boring
-              return Center(
-                child: Lottie.network(
-                  'https://gist.githubusercontent.com/olipiskandar/4f08ac098c81c32ebc02c55f5b11127b/raw/6e21dc500323da795e8b61b5558748b5c7885157/loading.json',
-                  repeat: true, // Animasi muter terus
-                  width: MediaQuery.of(context).size.width / 1, // Lebar full
-                ),
-              );
-            }
-            if (snapshot.hasData) {
-              // Kalau datanya udah ada, isi formnya otomatis
-              controller.nameController.text = snapshot.data!.name ?? '';
-              controller.descriptionController.text =
-                  snapshot.data!.description ?? '';
-              controller.eventDateController.text =
-                  snapshot.data!.eventDate ?? '';
-              controller.locationController.text =
-                  snapshot.data!.location ?? '';
-            }
-            return Column(
+      body: FutureBuilder<DetailEventResponse>(
+        future: controller.getDetailEvent(id: id), // Ambil detail event sesuai ID
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Kalau masih loading, kasih animasi lucu biar nggak boring
+            return Center(
+              child: Lottie.network(
+                'https://gist.githubusercontent.com/olipiskandar/4f08ac098c81c32ebc02c55f5b11127b/raw/6e21dc500323da795e8b61b5558748b5c7885157/loading.json',
+                repeat: true, // Animasi muter terus
+                width: MediaQuery.of(context).size.width / 1, // Lebar full
+              ),
+            );
+          }
+          if (snapshot.hasData) {
+            // Kalau datanya udah ada, isi formnya otomatis
+            controller.nameController.text = snapshot.data!.name ?? '';
+            controller.descriptionController.text = snapshot.data!.description ?? '';
+            controller.eventDateController.text = snapshot.data!.eventDate ?? '';
+            controller.locationController.text = snapshot.data!.location ?? '';
+          }
+          return SingleChildScrollView(
+            child: Column(
               children: [
                 // Animasi lucu buat header, biar tampilannya fun
                 Padding(
@@ -66,8 +62,7 @@ class EditView extends GetView {
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: TextField(
                     autofocus: true, // Fokus langsung ke input pertama
-                    controller:
-                        controller.nameController, // Controller buat nama
+                    controller: controller.nameController, // Controller buat nama
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(), // Border rapi
                       labelText: 'Event Name', // Label form
@@ -77,11 +72,9 @@ class EditView extends GetView {
                 ),
                 // Input deskripsi event
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                   child: TextField(
-                    controller: controller
-                        .descriptionController, // Controller deskripsi
+                    controller: controller.descriptionController, // Controller deskripsi
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Description',
@@ -93,8 +86,7 @@ class EditView extends GetView {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   child: TextField(
-                    controller:
-                        controller.eventDateController, // Controller tanggal
+                    controller: controller.eventDateController, // Controller tanggal
                     readOnly: true, // Supaya cuma bisa diubah lewat picker
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
@@ -111,19 +103,16 @@ class EditView extends GetView {
                       );
                       // Kalau tanggal dipilih, langsung di-set ke controller
                       if (selectedDate != null) {
-                        controller.eventDateController.text =
-                            DateFormat('yyyy-MM-dd').format(selectedDate);
+                        controller.eventDateController.text = DateFormat('yyyy-MM-dd').format(selectedDate);
                       }
                     },
                   ),
                 ),
                 // Input lokasi event
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                   child: TextField(
-                    controller:
-                        controller.locationController, // Controller lokasi
+                    controller: controller.locationController, // Controller lokasi
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Location',
@@ -156,9 +145,9 @@ class EditView extends GetView {
                   ),
                 ),
               ],
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
